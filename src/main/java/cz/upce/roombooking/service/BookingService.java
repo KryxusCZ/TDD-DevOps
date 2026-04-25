@@ -5,10 +5,13 @@ import cz.upce.roombooking.domain.BookingStatus;
 import cz.upce.roombooking.domain.Room;
 import cz.upce.roombooking.domain.User;
 import cz.upce.roombooking.exception.BookingConflictException;
+import cz.upce.roombooking.exception.BookingValidationException;
 import cz.upce.roombooking.repository.BookingRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.Clock;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -17,12 +20,27 @@ import java.util.List;
 public class BookingService {
 
     private final BookingRepository bookingRepository;
+    private final Clock clock;  // injektovaný — umožňuje mockování v testech
 
     public Booking createBooking(User user, Room room, LocalDateTime start, LocalDateTime end) {
-        // načteme všechny NEzrušené rezervace pro danou místnost
-        List<Booking> existing = bookingRepository.findByRoomAndStatusNot(room, BookingStatus.CANCELLED);
+        LocalDateTime now = LocalDateTime.now(clock);
 
-        // pravidlo 1: kolize — dva intervaly se překrývají pokud A začne před koncem B a zároveň B začne před koncem A
+        // pravidlo 2: nelze rezervovat v minulosti
+        if (!start.isAfter(now)) {
+            throw new BookingValidationException("Booking start time must not be in the past");
+        }
+
+        // pravidlo 3: délka rezervace musí být 30 min – 4 hodiny
+        Duration duration = Duration.between(start, end);
+        if (duration.toMinutes() < 30) {
+            throw new BookingValidationException("Booking duration must be at least 30 minutes");
+        }
+        if (duration.toHours() > 4) {
+            throw new BookingValidationException("Booking duration must not exceed 4 hours");
+        }
+
+        // pravidlo 1: kolize — dva intervaly se překrývají pokud A začne před koncem B a B začne před koncem A
+        List<Booking> existing = bookingRepository.findByRoomAndStatusNot(room, BookingStatus.CANCELLED);
         boolean hasConflict = existing.stream()
                 .anyMatch(b -> start.isBefore(b.getEndTime()) && end.isAfter(b.getStartTime()));
 
