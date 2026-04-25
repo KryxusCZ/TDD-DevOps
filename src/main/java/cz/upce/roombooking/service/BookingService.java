@@ -4,8 +4,11 @@ import cz.upce.roombooking.domain.Booking;
 import cz.upce.roombooking.domain.BookingStatus;
 import cz.upce.roombooking.domain.Room;
 import cz.upce.roombooking.domain.User;
+import cz.upce.roombooking.domain.UserRole;
 import cz.upce.roombooking.exception.BookingConflictException;
+import cz.upce.roombooking.exception.BookingNotFoundException;
 import cz.upce.roombooking.exception.BookingValidationException;
+import cz.upce.roombooking.exception.UnauthorizedCancellationException;
 import cz.upce.roombooking.repository.BookingRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -57,5 +60,30 @@ public class BookingService {
                 .build();
 
         return bookingRepository.save(booking);
+    }
+
+    public void cancelBooking(User requestingUser, Long bookingId) {
+        // načteme rezervaci nebo vyhodíme výjimku pokud neexistuje
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new BookingNotFoundException("Booking not found: " + bookingId));
+
+        // pravidlo 5: autorizace — kontrola kdo smí zrušit (vždy první, před business pravidly)
+        boolean isAdmin = requestingUser.getRole() == UserRole.ADMIN;
+        boolean isOwner = booking.getUser().getId().equals(requestingUser.getId());
+
+        if (!isAdmin && !isOwner) {
+            throw new UnauthorizedCancellationException("You can only cancel your own bookings");
+        }
+
+        // pravidlo 4: nelze zrušit méně než 2 hodiny před začátkem
+        LocalDateTime now = LocalDateTime.now(clock);
+        Duration timeUntilStart = Duration.between(now, booking.getStartTime());
+
+        if (timeUntilStart.toHours() < 2) {
+            throw new BookingValidationException("Cannot cancel booking less than 2 hours before start time");
+        }
+
+        booking.setStatus(BookingStatus.CANCELLED);
+        bookingRepository.save(booking);
     }
 }
