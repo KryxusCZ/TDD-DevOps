@@ -31,7 +31,7 @@ public class SecurityConfig {
             )
             .formLogin(form -> form
                 .loginPage("/login")
-                .defaultSuccessUrl("/rooms")    // po prihlaseni presmeruj na seznam mistnosti
+                .defaultSuccessUrl("/rooms", true)  // true = vzdy presmeruj na /rooms, ignoruj saved request
                 .permitAll()
             )
             .logout(logout -> logout
