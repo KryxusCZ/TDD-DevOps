@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Mistnosti - Room Booking</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+
+<!-- navigace -->
+<nav class="navbar navbar-dark bg-primary">
+    <div class="container">
+        <span class="navbar-brand">Room Booking</span>
+        <div class="d-flex align-items-center gap-3">
+            <a th:href="@{/bookings}" class="text-white text-decoration-none">Moje rezervace</a>
+            <!-- zobrazit "Sprava" pouze adminovi -->
+            <span sec:authorize="hasRole('ADMIN')" class="badge bg-warning text-dark">ADMIN</span>
+            <form th:action="@{/logout}" method="post" class="mb-0">
+                <button type="submit" class="btn btn-outline-light btn-sm">Odhlasit</button>
+            </form>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    <h2>Dostupne mistnosti</h2>
+
+    <div class="row mt-3">
+        <!-- th:each = Thymeleaf cyklus — pro kazdou mistnost vykresli kartu -->
+        <div class="col-md-4 mb-3" th:each="room : ${rooms}">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title" th:text="${room.name}">Nazev</h5>
+                    <p class="card-text text-muted" th:text="${room.description}">Popis</p>
+                    <p class="card-text">
+                        <small>Kapacita: <strong th:text="${room.capacity}">0</strong> osob</small>
+                    </p>
+                </div>
+                <div class="card-footer">
+                    <a th:href="@{/rooms/{id}/book(id=${room.id})}"
+                       class="btn btn-primary btn-sm w-100">Rezervovat</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
