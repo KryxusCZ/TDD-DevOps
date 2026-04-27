@@ -105,3 +105,32 @@ jobs:
           context: .
           push: ${{ github.ref == 'refs/heads/main' }}   # push jen z main vetve
           tags: ghcr.io/${{ github.repository }}:latest,ghcr.io/${{ github.repository }}:${{ github.sha }}
+
+  # -----------------------------------------------------------------------
+  # Job 4: CD — automaticke nasazeni do STAGING
+  # Bezi pouze pri push na main a az po uspesnem docker jobu
+  # Pouziva self-hosted runner ktery ma pristup ke kubectl a minikube
+  # -----------------------------------------------------------------------
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: self-hosted
+    needs: docker
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Nacti image do minikube
+        run: minikube image load ghcr.io/kryxuscz/room-booking:latest
+
+      - name: Vytvor staging namespace (pokud neexistuje)
+        run: kubectl apply -f k8s/staging/namespace.yml
+
+      - name: Nasad staging manifesty
+        run: kubectl apply -f k8s/staging/
+
+      # Prod se nasazuje rucne: kubectl apply -f k8s/prod/
+
+      - name: Zkontroluj stav nasazeni
+        run: kubectl rollout status deployment/room-booking -n room-booking-staging --timeout=120s
