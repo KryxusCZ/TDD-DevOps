@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
-    <title>Moje rezervace - Room Booking</title>
+    <title>Rezervace - Room Booking</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
@@ -18,7 +19,9 @@
 
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2>Moje rezervace</h2>
+        <!-- Admin vidi vsechny rezervace, uzivatel jen sve -->
+        <h2 sec:authorize="hasRole('ADMIN')">Vsechny rezervace</h2>
+        <h2 sec:authorize="hasRole('USER')">Moje rezervace</h2>
         <a th:href="@{/rooms}" class="btn btn-primary">Nova rezervace</a>
     </div>
 
@@ -36,6 +39,8 @@
         <thead class="table-light">
             <tr>
                 <th>Mistnost</th>
+                <!-- sloupec Uzivatel vidi jen admin -->
+                <th sec:authorize="hasRole('ADMIN')">Uzivatel</th>
                 <th>Od</th>
                 <th>Do</th>
                 <th>Stav</th>
@@ -45,18 +50,16 @@
         <tbody>
             <tr th:each="booking : ${bookings}">
                 <td th:text="${booking.room.name}">A101</td>
-                <!-- #temporals formatuje LocalDateTime pro zobrazeni -->
+                <td sec:authorize="hasRole('ADMIN')" th:text="${booking.user.username}">uzivatel</td>
                 <td th:text="${#temporals.format(booking.startTime, 'dd.MM.yyyy HH:mm')}">cas</td>
                 <td th:text="${#temporals.format(booking.endTime, 'dd.MM.yyyy HH:mm')}">cas</td>
                 <td>
-                    <!-- badge zmeni barvu podle stavu rezervace -->
                     <span th:text="${booking.status}"
                           th:classappend="${booking.status.name() == 'CONFIRMED'} ? 'bg-success' :
                                          (${booking.status.name() == 'CANCELLED'} ? 'bg-secondary' : 'bg-warning')"
                           class="badge">stav</span>
                 </td>
                 <td>
-                    <!-- tlacitko Zrusit zobrazit pouze pro CONFIRMED rezervace -->
                     <form th:if="${booking.status.name() == 'CONFIRMED'}"
                           th:action="@{/bookings/{id}/cancel(id=${booking.id})}"
                           method="post" class="d-inline">

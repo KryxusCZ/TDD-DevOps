@@ -4,6 +4,7 @@ import cz.upce.roombooking.domain.Booking;
 import cz.upce.roombooking.domain.BookingStatus;
 import cz.upce.roombooking.domain.Room;
 import cz.upce.roombooking.domain.User;
+import cz.upce.roombooking.domain.UserRole;
 import cz.upce.roombooking.dto.BookingRequest;
 import cz.upce.roombooking.exception.BookingConflictException;
 import cz.upce.roombooking.exception.BookingValidationException;
@@ -33,13 +34,15 @@ public class BookingController {
     private final RoomRepository roomRepository;
     private final UserRepository userRepository;
 
-    // GET /bookings — seznam rezervaci prihlaseneho uzivatele
+    // GET /bookings — admin vidi vsechny rezervace, uzivatel jen sve
     @GetMapping("/bookings")
     public String listMyBookings(@AuthenticationPrincipal UserDetails userDetails, Model model) {
         User user = getLoggedUser(userDetails);
-        List<Booking> bookings = bookingRepository.findByUser(user);
+        List<Booking> bookings = user.getRole() == UserRole.ADMIN
+                ? bookingRepository.findAll()
+                : bookingRepository.findByUser(user);
         model.addAttribute("bookings", bookings);
-        return "bookings/list";  // templates/bookings/list.html
+        return "bookings/list";
     }
 
     // POST /rooms/{id}/book — zpracovani formulare pro vytvoreni rezervace
