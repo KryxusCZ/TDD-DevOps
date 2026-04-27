@@ -58,6 +58,11 @@
             <groupId>org.thymeleaf.extras</groupId>
             <artifactId>thymeleaf-extras-springsecurity6</artifactId>
         </dependency>
+        <!-- Actuator: /actuator/health endpoint pro Docker HEALTHCHECK -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>com.h2database</groupId>
@@ -120,6 +125,16 @@
                             <artifactId>lombok</artifactId>
                         </exclude>
                     </excludes>
+                </configuration>
+            </plugin>
+            <!-- SpotBugs: staticka analyza bytekodu, hleda potencialni bugy -->
+            <plugin>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
+                <version>4.8.6.4</version>
+                <configuration>
+                    <!-- HIGH = pouze kriticke bugy, LOW/MEDIUM se reportuji ale neblokuji -->
+                    <failThreshold>HIGH</failThreshold>
                 </configuration>
             </plugin>
             <!-- JaCoCo: měří code coverage, generuje report pro CI -->

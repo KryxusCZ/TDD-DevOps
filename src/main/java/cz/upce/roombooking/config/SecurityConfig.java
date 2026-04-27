@@ -26,6 +26,8 @@ public class SecurityConfig {
                 .requestMatchers("/login", "/css/**", "/js/**").permitAll()
                 // H2 konzole dostupna pouze v dev profilu
                 .requestMatchers("/h2-console/**").permitAll()
+                // Actuator health — Docker HEALTHCHECK a monitoring bez autentizace
+                .requestMatchers("/actuator/health").permitAll()
                 // vse ostatni vyzaduje prihlaseni
                 .anyRequest().authenticated()
             )
