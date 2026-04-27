@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: room-booking
+  namespace: room-booking-staging
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: room-booking
+  template:
+    metadata:
+      labels:
+        app: room-booking
+    spec:
+      containers:
+        - name: room-booking
+          image: ghcr.io/kryxuscz/room-booking:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: room-booking-config
+          env:
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: room-booking-secret
+                  key: db-password
+          # Staging ma nizsi resource limity nez prod
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "250m"
+              memory: "256Mi"
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 3

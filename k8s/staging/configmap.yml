@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: room-booking-config
+  namespace: room-booking-staging
+data:
+  # Staging profil — odlisuje se od prod napr. explicitnim oznacenim v logu
+  SPRING_PROFILES_ACTIVE: "prod"
+  DB_URL: "jdbc:postgresql://postgres-service:5432/roombooking"
+  DB_USERNAME: "roombooking"
+  # Staging specifika — nizsi limity, vice logu
+  LOGGING_LEVEL_ROOT: "DEBUG"
