@@ -134,7 +134,7 @@
                 <version>4.8.6.4</version>
                 <configuration>
                     <!-- HIGH = pouze kriticke bugy, LOW/MEDIUM se reportuji ale neblokuji -->
-                    <failThreshold>HIGH</failThreshold>
+                    <failThreshold>High</failThreshold>
                 </configuration>
             </plugin>
             <!-- JaCoCo: měří code coverage, generuje report pro CI -->

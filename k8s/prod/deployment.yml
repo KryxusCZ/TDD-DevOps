@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: room-booking
-          image: ghcr.io/kryxuscz/room-booking:latest
+          image: ghcr.io/kryxuscz/tdd-devops:latest
           imagePullPolicy: IfNotPresent  # lokalni minikube; v prod zmen na Always
           ports:
             - containerPort: 8080
