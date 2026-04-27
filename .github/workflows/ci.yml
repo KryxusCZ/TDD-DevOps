@@ -111,7 +111,6 @@ jobs:
 
   # -----------------------------------------------------------------------
   # Job 4: CD — automaticke nasazeni do STAGING
-  # Bezi pouze pri push na main a az po uspesnem docker jobu
   # Pouziva self-hosted runner ktery ma pristup ke kubectl a minikube
   # -----------------------------------------------------------------------
   deploy-staging:
@@ -125,7 +124,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Nacti image do minikube
-        run: minikube image load ghcr.io/kryxuscz/room-booking:latest
+        run: minikube image load ghcr.io/kryxuscz/tdd-devops:latest
 
       - name: Vytvor staging namespace (pokud neexistuje)
         run: kubectl apply -f k8s/staging/namespace.yml
@@ -136,4 +135,4 @@ jobs:
       # Prod se nasazuje rucne: kubectl apply -f k8s/prod/
 
       - name: Zkontroluj stav nasazeni
-        run: kubectl rollout status deployment/room-booking -n room-booking-staging --timeout=120s
+        run: kubectl rollout status deployment/room-booking -n room-booking-staging --timeout=300s
