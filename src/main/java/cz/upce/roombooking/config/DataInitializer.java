@@ -11,9 +11,9 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-// Spusti se pouze v "dev" profilu — v produkci se testovaci data nevytvari
+// Spusti se v "dev" i "prod" profilu — vytvori demo data pokud je DB prazdna
 @Component
-@Profile("dev")
+@Profile({"dev", "prod"})
 @RequiredArgsConstructor
 public class DataInitializer implements CommandLineRunner {
 

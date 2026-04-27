@@ -16,7 +16,7 @@ spec:
       containers:
         - name: room-booking
           image: ghcr.io/kryxuscz/room-booking:latest
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent  # lokalni minikube; v prod zmen na Always
           ports:
             - containerPort: 8080
           # Konfigurace z ConfigMap (nezauta data)
