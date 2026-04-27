@@ -1,6 +1,7 @@
 package cz.upce.roombooking.controller;
 
 import cz.upce.roombooking.domain.Booking;
+import cz.upce.roombooking.domain.BookingStatus;
 import cz.upce.roombooking.domain.Room;
 import cz.upce.roombooking.domain.User;
 import cz.upce.roombooking.dto.BookingRequest;
@@ -56,6 +57,8 @@ public class BookingController {
         // validacni chyby z @Valid anotaci na BookingRequest
         if (bindingResult.hasErrors()) {
             model.addAttribute("room", room);
+            model.addAttribute("existingBookings",
+                    bookingRepository.findByRoomAndStatusNot(room, BookingStatus.CANCELLED));
             return "rooms/book";
         }
 
@@ -66,9 +69,11 @@ public class BookingController {
             return "redirect:/bookings";
 
         } catch (BookingValidationException | BookingConflictException e) {
-            // business pravidlo porouseno — vratime formular s chybovou zpravou
+            // business pravidlo porouseno — vratime formular s chybovou zpravou a aktualnimi rezervacemi
             model.addAttribute("room", room);
             model.addAttribute("error", e.getMessage());
+            model.addAttribute("existingBookings",
+                    bookingRepository.findByRoomAndStatusNot(room, BookingStatus.CANCELLED));
             return "rooms/book";
         }
     }
