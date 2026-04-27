@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: room-booking-service
+  namespace: room-booking-staging
+spec:
+  selector:
+    app: room-booking
+  ports:
+    - port: 80
+      targetPort: 8080
+  type: ClusterIP

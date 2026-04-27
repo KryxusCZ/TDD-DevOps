@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: room-booking-service
+  namespace: room-booking
+spec:
+  selector:
+    app: room-booking
+  ports:
+    - port: 80           # port na ktery posila Ingress
+      targetPort: 8080   # port na ktery nasloucha kontejner
+  type: ClusterIP        # Ingress pristupuje pres ClusterIP, ne pres NodePort
