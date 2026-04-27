@@ -123,9 +123,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Nacti image do minikube
-        run: minikube image load ghcr.io/kryxuscz/tdd-devops:latest
-
       - name: Vytvor staging namespace (pokud neexistuje)
         run: kubectl apply -f k8s/staging/namespace.yml
 

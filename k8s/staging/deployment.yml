@@ -16,7 +16,7 @@ spec:
       containers:
         - name: room-booking
           image: ghcr.io/kryxuscz/tdd-devops:latest
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always   # stahuje vzdy z ghcr.io (package musi byt public)
           ports:
             - containerPort: 8080
           envFrom:
