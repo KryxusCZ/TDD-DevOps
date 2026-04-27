@@ -1,0 +1,21 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: room-booking-ingress
+  namespace: room-booking
+  annotations:
+    # Pouzivame nginx ingress controller (minikube addons enable ingress)
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: room-booking.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: room-booking-service
+                port:
+                  number: 80

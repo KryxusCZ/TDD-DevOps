@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: room-booking
+  namespace: room-booking
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: room-booking
+  template:
+    metadata:
+      labels:
+        app: room-booking
+    spec:
+      containers:
+        - name: room-booking
+          image: ghcr.io/kryxuscz/room-booking:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          # Konfigurace z ConfigMap (nezauta data)
+          envFrom:
+            - configMapRef:
+                name: room-booking-config
+          # Heslo z Secret (citliva data oddelena od konfigurace)
+          env:
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: room-booking-secret
+                  key: db-password
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          # Liveness probe: K8s restartuje pod pokud aplikace prestane reagovat
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            failureThreshold: 3
+          # Readiness probe: K8s posila traffic az kdyz je aplikace pripravena
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 3
