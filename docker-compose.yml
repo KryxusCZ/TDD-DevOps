@@ -1,0 +1,43 @@
+services:
+
+  # -----------------------------------------------------------------------
+  # Aplikace — Spring Boot room-booking
+  # -----------------------------------------------------------------------
+  app:
+    build: .                          # postavi image z Dockerfile v tomto adresari
+    image: room-booking:local         # pojmenuje lokalni image
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: prod    # pouzije application-prod.properties (PostgreSQL)
+      DB_URL: jdbc:postgresql://db:5432/roombooking   # db = nazev sluzby nize
+      DB_USERNAME: roombooking
+      DB_PASSWORD: ${DB_PASSWORD}     # nacte se z .env souboru — zadne plaintext heslo v YAML
+    depends_on:
+      db:
+        condition: service_healthy    # ceka dokud PostgreSQL neohlasi ze je pripravena
+    restart: on-failure
+
+  # -----------------------------------------------------------------------
+  # Databaze — PostgreSQL
+  # Port 5433 na hostu (aby nekolidoval s pripadnou existujici instanci na 5432)
+  # -----------------------------------------------------------------------
+  db:
+    image: postgres:16-alpine         # alpine = mensi image
+    ports:
+      - "5433:5432"                   # host:kontejner
+    environment:
+      POSTGRES_DB: roombooking
+      POSTGRES_USER: roombooking
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - roombooking_db:/var/lib/postgresql/data   # pojmenovany volume = data preziji restart
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U roombooking -d roombooking"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+volumes:
+  roombooking_db:    # pojmenovany volume spravovany Dockerem
